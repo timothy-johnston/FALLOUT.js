@@ -11,23 +11,39 @@
 */
 
 
+
 /**
  * Description placeholder
- * @date 10/21/2023 - 11:11:36 AM
+ * @date 10/21/2023 - 12:32:02 PM
  *
- * @param {string} selector - valid css selector to identify target element(s)
- * @param {*} eventType - any valid event type; 'click', 'hover', 'pointerdown', etc
- * @param {*} handler
- * @param {*} handlerArgs
- * @returns {string}
+ * @param {string} selector
+ * @param {string} eventType
+ * @param {() => void} handler
+ * @returns {object}
  */
-function attachListener(selector: string, eventType: string, handler: () => void, handlerArgs?: object): string {
+function attachListener(selector: string, eventType: string, handler: () => void): object {
+
+    //Define success/failure info to return to caller
+    let response = {
+        code: 1,
+        msg: "Unable to attach listeners; no elements found by selector.",
+        elements: [] as object[]
+    }
+
+    //Select elements to append listener to; loop over these and assign listener; update the
+    //response object with success code & supporting info
     const targetEls = document.querySelectorAll(selector);
-    if ()
-    .forEach(targetEl => {
-        targetEl.addEventListener(eventType)
-    })
-    return "yeah";
+    if (isPopulated(targetEls)) {
+        response.code = 0;
+        response.msg = "At least one element successfully found by selector. See the 'elements' field.";
+        targetEls.forEach(targetEl => {
+            targetEl.addEventListener(eventType, handler);
+            response.elements.push(targetEl);
+        })
+    }
+    
+    return response;
+    
 }
 
 

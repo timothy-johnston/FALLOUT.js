@@ -5,12 +5,17 @@
     Events and Listeners
     
     FUNCTIONALITY
-    Handle events, assign listeners, etc
+    Assign listeners, handle events, etc
 
 ---------------------------------------------------------------------------------------------------
 */
 
 
+attachListener(selector, eventType, handler, handlerArgs) {
+    document.querySelectorAll(selector).forEach(targetEl => {
+        targetEl.addEventListenter(eventType)
+    })
+}
 
 
 

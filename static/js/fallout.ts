@@ -119,6 +119,17 @@ function isEmpty(val: any[] | object): boolean {
 
 /**
  * Description placeholder
+ * @date 10/21/2023 - 12:09:34 PM
+ *
+ * @param {(any[] | object)} val
+ * @returns {boolean}
+ */
+function isPopulated(val: any[] | object): boolean {
+    return !isEmpty(val);
+}
+
+/**
+ * Description placeholder
  * @date 10/21/2023 - 12:07:26 PM
  *
  * @param {object} obj

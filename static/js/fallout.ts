@@ -62,18 +62,82 @@ function attachListener(selector: string, eventType: string, handler: () => void
 ---------------------------------------------------------------------------------------------------
     
     CATEGORY
-    
+    Animation
     
     FUNCTIONALITY
-    
+    Visual effects
 
 ---------------------------------------------------------------------------------------------------
 */
 
+function animate(selector: String, group: String, variation: String, options: object) {
+
+    let animConfig = _getAnimationConfig(group, variation, options);
+
+
+}
+
+
+function _getAnimationConfig(group: String, variation: String, options: object) {
+
+    enum animGroups {
+        TEXT = "text"
+    }
+
+    let defaultConfig = {};
+    let config = mergeObject(defaultConfig, options);
+
+    switch(group){
+        case animGroups.TEXT:
+            new TextAnimationConfig(variation, options);
+            break;
+    }
+
+}
+
+
+/* 
+--------------------------
+    SUBCATEGORY
+    Animation Configurers
+--------------------------
+*/
+
+class AnimationConfig {
+    protected variation: String;
+    protected options: object;
+    protected groupVariations: object;
+    constructor(variation: String, options: object) {
+        this.variation = variation;
+        this.options = options;
+    }
+
+
+}
+
+class TextAnimationConfig extends AnimationConfig {
 
 
 
+    constructor(variation: String, options: object) {
+    super(variation, options);
+    
+        this.groupVariations = {
+            TYPING: "typing"
+        }
+    
+    }
 
+    
+
+
+    public configure() {
+
+
+
+    };
+
+}
 
 
 
@@ -85,10 +149,10 @@ function attachListener(selector: string, eventType: string, handler: () => void
 ---------------------------------------------------------------------------------------------------
     
     CATEGORY
-    
+    Admin
     
     FUNCTIONALITY
-    
+    Error handling, input validation, etc
 
 ---------------------------------------------------------------------------------------------------
 */
@@ -274,6 +338,23 @@ function emptyObject(obj: object): boolean {
  */
 function emptyArray(arr: any[]): boolean {
     return (arr.length == 0)
+}
+
+//recursively merges
+function mergeObject(target, source): object {
+
+    let merged: object = target;
+
+    for (const property in source) {
+        if (isSet(target, property) && typeof(get(target, property)) == "object") {
+            merged = mergeObject(get(target, property), get(source, property))
+        } else {
+            merged[property] = source[property];
+        }
+    }
+
+    return merged;
+
 }
 
 

@@ -86,12 +86,19 @@ function _getAnimationConfig(group: String, variation: String, options: object) 
 
     let defaultConfig = {};
     let config = mergeObject(defaultConfig, options);
+    let runner;
 
     switch(group){
         case animGroups.TEXT:
-            new TextAnimationConfig(variation, options);
+            runner = new TextAnimationRunner();
+            break;
+        default:
+            __error();
             break;
     }
+
+
+    runner.prepare(variation, config)
 
 }
 
@@ -103,47 +110,157 @@ function _getAnimationConfig(group: String, variation: String, options: object) 
 --------------------------
 */
 
-class AnimationConfig {
+interface varObj {
+    
+}
+
+abstract class AnimationRunner {
+    
+    //Member variables
     protected variation: String;
     protected options: object;
-    protected groupVariations: object;
-    constructor(variation: String, options: object) {
+    protected groupVariations: {[key: string]: any}; //use as enum; define in sublcass constructor
+    protected isPrepared: boolean = false;
+    protected animationHandler: () => void;
+    protected config: object = {
+        "test": "hello world"
+    };
+
+    //Super methods
+    public prepare(variation: String, options: object) {
         this.variation = variation;
         this.options = options;
+        this.config = mergeObject(this.config, this.options);
+        this._prepare();
     }
+
+    public run() {
+        this.animationHandler();
+    };
+
+    //Abstract methods; all to be implemented by descendant class
+    protected abstract _prepare();
+    // public abstract run();
+
 
 
 }
 
-class TextAnimationConfig extends AnimationConfig {
+class DisplayAnimationRunner extends AnimationRunner {
+        //Define groupVariation options
+        constructor() {
+            super();
+            this.groupVariations = {
+                BLINK: "blink"
+            }
+        }
 
-
-
-    constructor(variation: String, options: object) {
-    super(variation, options);
+        protected _prepare() {
+            let error = 0;
+            switch (this.variation) {
+                case this.groupVariations.TYPING:
+                    this._configureAnimationDisplayBlink();
+                    break;
+                default:
+                    __error(); 
+                    error = 1;   
+                    break;
+            }
     
+            if (error == 0) {
+                this.isPrepared = true;
+            }
+    
+        };
+
+        private _configureAnimationDisplayBlink() {
+            this.animationHandler = () => this._animateDisplayBlink();
+        }
+
+        private _animateDisplayBlink() {
+
+        }
+
+}
+
+class TextAnimationRunner extends AnimationRunner {
+
+    //Define groupVariation options
+    constructor() {
+        super();
         this.groupVariations = {
             TYPING: "typing"
         }
-    
     }
 
-    
+    protected _prepare() {
+        let error = 0;
+        switch (this.variation) {
+            case this.groupVariations.TYPING:
+                this._configureAnimationTextTyping();
+                break;
+            default:
+                __error(); 
+                error = 1;   
+                break;
+        }
 
-
-    public configure() {
-
-
+        if (error == 0) {
+            this.isPrepared = true;
+        }
 
     };
 
+    // public run() {
+    //     this.animationHandler();
+    // };
+
+    private _configureAnimationTextTyping() {
+
+        this.animationHandler = () => this._animateTextTyping();
+        //Require this.config to have:
+
+
+        //Optional:
+
+    }
+
+    private _animateTextTyping () {
+
+        const target = get(this.config, "target");
+        const text = get(this.config, "text");
+        const cursorConfig = get(this.config, "cursor");
+        const showCursor = get(cursorConfig, "show");
+        let cursorSelector: string;
+        let blinkCursor: boolean;   //true or false
+        let blinkCursorSpeed: number;   //milliseconds
+        let inteval_blinkCursor;    //interval function to handle cursor blink
+        const speed = get(this.config, "speed");    //milliseconds
+
+        //Trigger cursor-blink, if requested
+        if (showCursor) {
+            let cursor = document.getElementsByTagName(get(this.config, "cursor_selector"))[0];
+            cursor.classList.remove("hidden");
+            blinkCursor = get(this.config, "blink");
+            blinkCursorSpeed = get(this.config, "blink_speed");
+            if (get(cursorConfig, "blink")) {
+                const cursorAnimationRunner = new DisplayAnimationRunner();
+                cursorAnimationRunner.prepare("blink", cursorConfig);
+                cursorAnimationRunner.run();
+            }
+            
+        }
+
+        for (let position in text) {
+            let letter = text[position];
+            let targetText = target.innerText;
+            targetText += letter;
+            target.innerText = targetText;
+        }
+
+    }
+
 }
-
-
-
-
-
-
 
 /* 
 ---------------------------------------------------------------------------------------------------
@@ -156,17 +273,9 @@ class TextAnimationConfig extends AnimationConfig {
 
 ---------------------------------------------------------------------------------------------------
 */
-
-
-
-
-
-
-
-
-
-
-
+function __error() {
+    console.log("global error handler");
+}
 
 /* 
 ---------------------------------------------------------------------------------------------------
@@ -194,11 +303,12 @@ function get(obj: object, ...keys: string[]|string[][]): any {
     //I think with the check for target key != undefined and not an array handles this edge case,
     //but need gracefully return something useful to the user - maybe throw exception 
 
-
     let targetVal;
-    if (_isDefinedAndNotNulll(keys) && populated(keys)) {
+    if (_isDefinedAndNotNulll(keys) && isPopulated(keys)) {
         const targetKey = keys.shift();
         if (typeof(targetKey) != "undefined" && !Array.isArray(targetKey)) {
+            //todo: revisit this logic - why checking for if key is not array?
+            //see comment above also. this algorithm needs revisited
             
             targetVal = obj[targetKey];
             
@@ -207,7 +317,7 @@ function get(obj: object, ...keys: string[]|string[][]): any {
             //function using the retrieved targetVal & shifted keys array
             let keysShifted = [] as string[];
             keys.forEach((key) => { keysShifted.push(key)} );
-            if (populated(keysShifted)) {
+            if (isPopulated(keysShifted)) {
                 get(targetVal, keysShifted)
             }
                         
@@ -249,7 +359,7 @@ function isSet(valOrObj: any, ...keys: string[]|string[][]): boolean {
     //target value. If it is not empty then we need to continue traversing down the input object,
     //and will do so by shifting the keys array and recursively calling this method on the new obj
     let targetIsSet = _isDefinedAndNotNulll(valOrObj);
-    if (targetIsSet && (_isDefinedAndNotNulll(keys) && populated(keys))) {
+    if (targetIsSet && (_isDefinedAndNotNulll(keys) && isPopulated(keys))) {
 
         //Get the value at the first key in the key path
         let targetVal;
@@ -263,7 +373,7 @@ function isSet(valOrObj: any, ...keys: string[]|string[][]): boolean {
             //function using the retrieved targetVal & shifted keys array
             let keysShifted = [] as string[];
             keys.forEach((key) => { keysShifted.push(key)} );
-            if (populated(keysShifted)) {
+            if (isPopulated(keysShifted)) {
                 isSet(targetVal, keysShifted)
             }
 
@@ -314,7 +424,7 @@ function empty(val: any[] | object): boolean {
  * @param {(any[] | object)} val
  * @returns {boolean}
  */
-function populated(val: any[] | object): boolean {
+function isPopulated(val: any[] | object): boolean {
     return !empty(val);
 }
 

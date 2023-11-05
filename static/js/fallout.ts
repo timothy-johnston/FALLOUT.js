@@ -114,6 +114,10 @@ interface varObj {
     
 }
 
+//TODO: In documentation for this, mention abstract class parent/child relationship, and explain
+//the different "types" of animation runners. For example, DisplayAnimationRunner runs display-related 
+//animations (ie, blinking an object from visible to invisble), TextAnimationRunner runs text-related
+//animations, like simulating a sentence being typed out in real time
 abstract class AnimationRunner {
     
     //Member variables
@@ -216,10 +220,6 @@ class TextAnimationRunner extends AnimationRunner {
         }
 
     };
-
-    // public run() {
-    //     this.animationHandler();
-    // };
 
     private _configureAnimationTextTyping() {
 

@@ -282,9 +282,15 @@ class TextAnimationRunner extends AnimationRunner {
 
 ---------------------------------------------------------------------------------------------------
 */
+//todo: make error handler class and move to different file. it will have methods like error, error_console, etc 
+//could make an abstract class called "info" - it could have two implementations: infoUser and infoConsole 
 function __error() {
     console.log("global error handler");
     throw "error handler";
+}
+
+function __error_console(msg: string) {
+    console.log(msg);
 }
 
 /* 
@@ -410,65 +416,20 @@ function _isDefinedAndNotNulll(val: any): boolean {
 
 /**
  * Description placeholder
- * @date 10/21/2023 - 12:07:18 PM
- *
- * @param {(any[] | object)} val
- * @returns {boolean}
- */
-function isEmpty(val: any[] | object): boolean {
-
-    let isEmpty: boolean;
-    if (Array.isArray(val)) {
-        isEmpty = isEmptyArray(val);
-    } else if (typeof(val) == "object") {
-        isEmpty = isEmptyObject(val);
-    } else {
-        __error();
-        throw "oh no"
-    }
-
-    return isEmpty;
-
-}
-
-/**
- * Description placeholder
  * @date 10/21/2023 - 12:09:34 PM
  *
  * @param {(any[] | object)} val
  * @returns {boolean}
  */
 function isPopulated(val: any[] | object): boolean {
-    return !isEmpty(val);
-}
-
-/**
- * Description placeholder
- * @date 10/21/2023 - 12:07:26 PM
- *
- * @param {object} obj
- * @returns {boolean}
- */
-function isEmptyObject(obj: object): boolean {
-    return isEmptyArray(Object.keys(obj));
-}
-
-/**
- * Description placeholder
- * @date 10/21/2023 - 12:07:32 PM
- *
- * @param {any[]} arr
- * @returns {boolean}
- */
-function isEmptyArray(arr: any[]): boolean {
-    //NOTE: 
-    if (_isDefinedAndNotNulll(arr)) {
-        let isEmpty: boolean = (arr.length == 0);
-        return isEmpty;
-    } else {
-        __error();
+    let isPopulated: boolean = false;
+    if (Array.isArray(val)) {
+        isPopulated = (val.length > 0);
+    } else if (typeof(val) == "object") {
+        isPopulated = (Object.keys(val).length > 0)
     }
-    
+    __error_console("Attempted to call 'isPopulated' on invalid object: " + val);
+    return isPopulated;
 }
 
 //recursively merges

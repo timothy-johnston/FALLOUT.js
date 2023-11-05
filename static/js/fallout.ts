@@ -122,9 +122,10 @@ abstract class AnimationRunner {
     protected groupVariations: {[key: string]: any}; //use as enum; define in sublcass constructor
     protected isPrepared: boolean = false;
     protected animationHandler: () => void;
-    protected config: object = {
-        "test": "hello world"
+    protected config: {[key: string]: any} = {
+        "attrs": {}
     };
+    protected animationAttrs: {[key: string]: any} = {};
 
     //Super methods
     public prepare(variation: String, options: object) {
@@ -140,9 +141,6 @@ abstract class AnimationRunner {
 
     //Abstract methods; all to be implemented by descendant class
     protected abstract _prepare();
-    // public abstract run();
-
-
 
 }
 
@@ -178,7 +176,15 @@ class DisplayAnimationRunner extends AnimationRunner {
         }
 
         private _animateDisplayBlink() {
-
+            const targetSelector = get(this.config, "target_selector");
+            const targets = document.querySelectorAll(targetSelector);   //this will support animating multiple elements
+            const speed = get(this.config, "speed");
+            const repeatImplementation: () => void = function() {
+                targets.forEach(target => {
+                    target.classList.toggle("hidden");
+                });
+            }
+            this.config.attrs.repeat_id = repeat(repeatImplementation, speed);
         }
 
 }
@@ -465,6 +471,17 @@ function mergeObject(target, source): object {
 
     return merged;
 
+}
+
+//easy way to create intervals
+function repeat(callback, delay = 5000): number {
+    const repeatId: number = setInterval(callback, delay);
+    return repeatId;
+}
+
+//easy way to stop intervals
+function repeatStop(repeatId) {
+    clearInterval(repeatId);
 }
 
 

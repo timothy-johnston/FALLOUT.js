@@ -3,6 +3,9 @@ export class FALLOUT {
         console.log("FALLOUT initialized.");
     }
 }
+interface OptionsGet {
+    keys: string[];
+}
 /* 
 ---------------------------------------------------------------------------------------------------
     
@@ -307,6 +310,47 @@ function __error_console(msg: string) {
 ---------------------------------------------------------------------------------------------------
 */
 
+//this method signature should accept EITHER any number of string rest arguments, or exactly one
+//string array. to test: 1, with multiple string args, 2 with one string array arg, 3 with multiple
+//string array args (this one should fail)
+function get2(obj: {[key: string]: any}, ...keys: (string | string[])[]): any {
+    if (_isDefinedAndNotNull(keys) && isPopulated(keys)) {
+        //Ideally based on the method signature and this conditional check, keys is guaranteed to 
+        //be an array of strings (if we're here). make sure to confirm / test this
+        let key = keys.shift();
+        if (Array.isArray(key)) {
+            //Handle case where ...keys is exactly one array of strings
+            keys = key;
+            key = keys.shift();
+        }
+        if (_isDefinedAndNotNull(obj)) {
+            let val = get2(obj, keys as string[]);
+            if (_isDefinedAndNotNull(val) && typeof(val) == "object" && isPopulated(val)) {
+                val = get2(val, keys as string[])
+            }
+            return val;
+        }
+    } else {
+        __error_console("Invalid input ...keys");
+    }
+    // return "test";
+}
+
+// function get2(obj: {[key: string]: any}, ...keys: string[]): any;
+// function get2(obj: {[key: string]: any}, ...test: string[]): any {
+//   if (keys.length > 0) {
+//     // You can now access 'keys' as an array of string parameters
+//     // Your code here
+//   }
+
+//   return "test";
+// }
+
+
+
+
+
+
 function get(obj: {[key: string]: any}): object;
 function get(obj: {[key: string]: any}, keys: string[]): any;
 function get(obj: {[key: string]: any}, ...keys: string[]): any;
@@ -320,7 +364,7 @@ function get(obj: {[key: string]: any}, ...keys: string[]|string[][]): any {
     //but need gracefully return something useful to the user - maybe throw exception 
 
     let targetVal;
-    if (_isDefinedAndNotNulll(keys) && isPopulated(keys)) {
+    if (_isDefinedAndNotNull(keys) && isPopulated(keys)) {
         const targetKey = keys.shift();
         if (typeof(targetKey) != "undefined" && !Array.isArray(targetKey)) {
             //todo: revisit this logic - why checking for if key is not array?
@@ -375,8 +419,8 @@ function isSet(valOrObj: any, ...keys: string[]|string[][]): boolean {
     //We also check the length of the 'keys' array; if it is empty then we know we've evaluated out
     //target value. If it is not empty then we need to continue traversing down the input object,
     //and will do so by shifting the keys array and recursively calling this method on the new obj
-    let targetIsSet = _isDefinedAndNotNulll(valOrObj);
-    if (targetIsSet && (_isDefinedAndNotNulll(keys) && isPopulated(keys))) {
+    let targetIsSet = _isDefinedAndNotNull(valOrObj);
+    if (targetIsSet && (_isDefinedAndNotNull(keys) && isPopulated(keys))) {
 
         //Get the value at the first key in the key path
         let targetVal;
@@ -402,7 +446,7 @@ function isSet(valOrObj: any, ...keys: string[]|string[][]): boolean {
 
 }
 
-function _isDefinedAndNotNulll(val: any): boolean {
+function _isDefinedAndNotNull(val: any): boolean {
     //Strict equality checks for input is UNDEFINED or NULL
     //If all evaluate to false, the input is defined and we can return true
     //If at least one

@@ -97,8 +97,10 @@ function _getAnimationConfig(group: String, variation: String, options: object) 
             break;
     }
 
-
-    runner.prepare(variation, config)
+    if (isSet(runner)) {
+        (runner as AnimationRunner).prepare(variation, config) //ts linters may not recognize that isSet checks for defined
+    }
+    
 
 }
 
@@ -131,6 +133,14 @@ abstract class AnimationRunner {
     };
     protected animationAttrs: {[key: string]: any} = {};
 
+    constructor() {
+        this.variation = "",
+        this.options = {};
+        this.animationHandler = function(){}; 
+        this.groupVariations = {};
+        this.animationAttrs = {};
+    }
+
     //Super methods
     public prepare(variation: String, options: object) {
         this.variation = variation;
@@ -144,7 +154,7 @@ abstract class AnimationRunner {
     };
 
     //Abstract methods; all to be implemented by descendant class
-    protected abstract _prepare();
+    protected abstract _prepare(): object;
 
 }
 

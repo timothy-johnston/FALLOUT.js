@@ -237,11 +237,8 @@ class TextAnimationRunner extends AnimationRunner {
         const text = get(this.config, "text");
         const cursorConfig = get(this.config, "cursor");
         const showCursor = get(cursorConfig, "show");
-        let cursorSelector: string;
         let blinkCursor: boolean;   //true or false
         let blinkCursorSpeed: number;   //milliseconds
-        let inteval_blinkCursor;    //interval function to handle cursor blink
-        const speed = get(this.config, "speed");    //milliseconds
 
         //Trigger cursor-blink, if requested
         if (showCursor) {

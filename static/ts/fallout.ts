@@ -489,13 +489,13 @@ function mergeObject(target: {[key: string]: any}, source: {[key: string]: any})
 }
 
 //easy way to create intervals
-function repeat(callback, delay = 5000): number {
+function repeat(callback: () => void, delay = 5000): number {
     const repeatId: number = setInterval(callback, delay);
     return repeatId;
 }
 
 //easy way to stop intervals
-function repeatStop(repeatId) {
+function repeatStop(repeatId: number) {
     clearInterval(repeatId);
 }
 

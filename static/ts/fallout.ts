@@ -98,7 +98,7 @@ function _getAnimationConfig(group: String, variation: String, options: object) 
     }
 
     if (isSet(runner)) {
-        (runner as AnimationRunner).prepare(variation, config) //ts linters may not recognize that isSet checks for defined
+        (runner as AnimationRunner).prepare(variation, config);
     }
     
 
@@ -111,10 +111,6 @@ function _getAnimationConfig(group: String, variation: String, options: object) 
     Animation Configurers
 --------------------------
 */
-
-interface varObj {
-    
-}
 
 //TODO: In documentation for this, mention abstract class parent/child relationship, and explain
 //the different "types" of animation runners. For example, DisplayAnimationRunner runs display-related 
@@ -142,7 +138,7 @@ abstract class AnimationRunner {
     }
 
     //Super methods
-    public prepare(variation: String, options: object) {
+    public prepare(variation: String, options: object): void {
         this.variation = variation;
         this.options = options;
         this.config = mergeObject(this.config, this.options);
@@ -154,7 +150,7 @@ abstract class AnimationRunner {
     };
 
     //Abstract methods; all to be implemented by descendant class
-    protected abstract _prepare(): object;
+    protected abstract _prepare(): void;
 
 }
 
@@ -167,7 +163,7 @@ class DisplayAnimationRunner extends AnimationRunner {
             }
         }
 
-        protected _prepare() {
+        protected _prepare(): void {
             let error = 0;
             switch (this.variation) {
                 case this.groupVariations.TYPING:
@@ -288,6 +284,7 @@ class TextAnimationRunner extends AnimationRunner {
 */
 function __error() {
     console.log("global error handler");
+    throw "error handler";
 }
 
 /* 
@@ -304,10 +301,10 @@ function __error() {
 ---------------------------------------------------------------------------------------------------
 */
 
-function get(obj: object): object;
-function get(obj: object, keys: string[]): any;
-function get(obj: object, ...keys: string[]): any;
-function get(obj: object, ...keys: string[]|string[][]): any {
+function get(obj: {[key: string]: any}): object;
+function get(obj: {[key: string]: any}, keys: string[]): any;
+function get(obj: {[key: string]: any}, ...keys: string[]): any;
+function get(obj: {[key: string]: any}, ...keys: string[]|string[][]): any {
 
     //TODO: What if input arg keys is array of arrays (because i believe this will be allowed based
     //on the ...keys: string[]|string[][] def, even though thats not what i want).  Handle.
@@ -328,10 +325,11 @@ function get(obj: object, ...keys: string[]|string[][]): any {
             //Shift the first key off the path; create a new array of the provided keys minus the one
             //that was shifted off. If there is at least one key remaining, recursively call this
             //function using the retrieved targetVal & shifted keys array
-            let keysShifted = [] as string[];
-            keys.forEach((key) => { keysShifted.push(key)} );
-            if (isPopulated(keysShifted)) {
-                get(targetVal, keysShifted)
+            // let keysShifted = [] as string[];
+            // keys.forEach((key) => { keysShifted.push(key)} );
+
+            if (isPopulated(keys)) {
+                get(targetVal, keys)
             }
                         
         } else {
@@ -384,10 +382,10 @@ function isSet(valOrObj: any, ...keys: string[]|string[][]): boolean {
             //Shift the first key off the path; create a new array of the provided keys minus the one
             //that was shifted off. If there is at least one key remaining, recursively call this
             //function using the retrieved targetVal & shifted keys array
-            let keysShifted = [] as string[];
-            keys.forEach((key) => { keysShifted.push(key)} );
-            if (isPopulated(keysShifted)) {
-                isSet(targetVal, keysShifted)
+            // let keysShifted = [] as string[];
+            // keys.forEach((key) => { keysShifted.push(key)} );
+            if (isPopulated(keys)) {
+                isSet(targetVal, keys)
             }
 
         }
@@ -417,13 +415,16 @@ function _isDefinedAndNotNulll(val: any): boolean {
  * @param {(any[] | object)} val
  * @returns {boolean}
  */
-function empty(val: any[] | object): boolean {
+function isEmpty(val: any[] | object): boolean {
 
-    let isEmpty;
+    let isEmpty: boolean;
     if (Array.isArray(val)) {
-        isEmpty = emptyArray(val);
+        isEmpty = isEmptyArray(val);
     } else if (typeof(val) == "object") {
-        isEmpty = emptyObject(val);
+        isEmpty = isEmptyObject(val);
+    } else {
+        __error();
+        throw "oh no"
     }
 
     return isEmpty;
@@ -438,7 +439,7 @@ function empty(val: any[] | object): boolean {
  * @returns {boolean}
  */
 function isPopulated(val: any[] | object): boolean {
-    return !empty(val);
+    return !isEmpty(val);
 }
 
 /**
@@ -448,8 +449,8 @@ function isPopulated(val: any[] | object): boolean {
  * @param {object} obj
  * @returns {boolean}
  */
-function emptyObject(obj: object): boolean {
-    return emptyArray(Object.keys(obj));
+function isEmptyObject(obj: object): boolean {
+    return isEmptyArray(Object.keys(obj));
 }
 
 /**
@@ -459,14 +460,21 @@ function emptyObject(obj: object): boolean {
  * @param {any[]} arr
  * @returns {boolean}
  */
-function emptyArray(arr: any[]): boolean {
-    return (arr.length == 0)
+function isEmptyArray(arr: any[]): boolean {
+    //NOTE: 
+    if (_isDefinedAndNotNulll(arr)) {
+        let isEmpty: boolean = (arr.length == 0);
+        return isEmpty;
+    } else {
+        __error();
+    }
+    
 }
 
 //recursively merges
-function mergeObject(target, source): object {
+function mergeObject(target: {[key: string]: any}, source: {[key: string]: any}): object {
 
-    let merged: object = target;
+    let merged: {[key: string]: any} = target;
 
     for (const property in source) {
         if (isSet(target, property) && typeof(get(target, property)) == "object") {

@@ -310,10 +310,49 @@ function __error_console(msg: string) {
 ---------------------------------------------------------------------------------------------------
 */
 
+function getDeep(obj: {[key: string]: any}, key: string[], required?: boolean = false): any {
+    return "hi"
+}
+
+function get3(obj: {[key: string]: any}, key: string, required?: boolean = false): any {
+    if (required) {
+
+    }
+    return "hi";
+}
+
+//diference between get and getRequired: get will return 'undefined' if the target key is not
+//set. getRequired will instead throw and exception
+function get(obj: {[key: string]: any}, key: string): any {
+    return obj[key];
+}
+
+function getNested(obj: {[key: string]: any}, keys: string[]) {
+    let key: string = keys.shift() as string;
+    let val = obj[key];
+    if (keys.length > 0) {
+        val = getNested(val, keys);
+    }
+    return val;
+}
+
+function getRequired(obj: {[key: string]: any}, key: string): any {
+    let val = obj[key];
+    if (!_isDefinedAndNotNull(val)) {
+        __error();
+    }
+    return val;
+}
+
+function getNestedRequired(obj: {[key: string]: any}, key: string[]) {
+
+}
+
+
 //this method signature should accept EITHER any number of string rest arguments, or exactly one
 //string array. to test: 1, with multiple string args, 2 with one string array arg, 3 with multiple
 //string array args (this one should fail)
-function get2(obj: {[key: string]: any}, ...keys: (string | string[])[]): any {
+function get2___(obj: {[key: string]: any}, ...keys: (string | string[])[]): any {
     if (_isDefinedAndNotNull(keys) && isPopulated(keys)) {
         //Ideally based on the method signature and this conditional check, keys is guaranteed to 
         //be an array of strings (if we're here). make sure to confirm / test this
@@ -351,10 +390,10 @@ function get2(obj: {[key: string]: any}, ...keys: (string | string[])[]): any {
 
 
 
-function get(obj: {[key: string]: any}): object;
-function get(obj: {[key: string]: any}, keys: string[]): any;
-function get(obj: {[key: string]: any}, ...keys: string[]): any;
-function get(obj: {[key: string]: any}, ...keys: string[]|string[][]): any {
+function get_____(obj: {[key: string]: any}): object;
+function get_____(obj: {[key: string]: any}, keys: string[]): any;
+function get_____(obj: {[key: string]: any}, ...keys: string[]): any;
+function get_____(obj: {[key: string]: any}, ...keys: string[]|string[][]): any {
 
     //TODO: What if input arg keys is array of arrays (because i believe this will be allowed based
     //on the ...keys: string[]|string[][] def, even though thats not what i want).  Handle.

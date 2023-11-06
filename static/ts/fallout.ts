@@ -3,9 +3,6 @@ export class FALLOUT {
         console.log("FALLOUT initialized.");
     }
 }
-interface OptionsGet {
-    keys: string[];
-}
 /* 
 ---------------------------------------------------------------------------------------------------
     
@@ -347,6 +344,7 @@ function getNestedIfSet(obj: {[key: string]: any}, keys: string[]) {
 }
 
 function isSet(obj: any): boolean;
+function isSet(obj: any, key: string): boolean;
 function isSet(obj: any, key?: string): boolean {
     if (_isDefinedAndNotNull(key)) {
         obj = obj[key as string];

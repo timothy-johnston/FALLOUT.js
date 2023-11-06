@@ -310,17 +310,6 @@ function __error_console(msg: string) {
 ---------------------------------------------------------------------------------------------------
 */
 
-function getDeep(obj: {[key: string]: any}, key: string[], required?: boolean = false): any {
-    return "hi"
-}
-
-function get3(obj: {[key: string]: any}, key: string, required?: boolean = false): any {
-    if (required) {
-
-    }
-    return "hi";
-}
-
 //diference between get and getRequired: get will return 'undefined' if the target key is not
 //set. getRequired will instead throw and exception
 function get(obj: {[key: string]: any}, key: string): any {
@@ -344,8 +333,12 @@ function getRequired(obj: {[key: string]: any}, key: string): any {
     return val;
 }
 
-function getNestedRequired(obj: {[key: string]: any}, key: string[]) {
-
+function getNestedRequired(obj: {[key: string]: any}, keys: string[]) {
+    let val = getNested(obj, keys);
+    if (!_isDefinedAndNotNull(val)) {
+        __error();
+    }
+    return val;
 }
 
 
